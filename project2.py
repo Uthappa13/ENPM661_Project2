@@ -135,9 +135,22 @@ def function_backtracking(initial_state, goal_state, list_close, map):
     path_stack = []
     
     # Iterate through all the keys and set the color to white to mark the explored nodes
-    for key in list_close.keys():    
+    frame_skip = 20
+    frame_counter = 0
+
+    # Iterate through all the keys and set the color to white to mark the explored nodes
+    for key in list_close.keys():
+        frame_counter += 1
         map[key[1]][key[0]] = [255, 255, 255]
         
+        # Only update the display and write to the video on specific frames
+        if frame_counter % frame_skip == 0:
+            cv2.imshow("Project 2 output", map)
+            cv2.waitKey(1)
+            out.write(map)
+    
+    # Ensure the final state is written and displayed
+    if frame_counter % frame_skip != 0:
         cv2.imshow("Project 2 output", map)
         cv2.waitKey(1)
         out.write(map)
