@@ -135,7 +135,7 @@ def function_backtracking(initial_state, goal_state, list_close, map):
     path_stack = []
     
     # Iterate through all the keys and set the color to white to mark the explored nodes
-    frame_skip = 20
+    frame_skip = 35
     frame_counter = 0
 
     # Iterate through all the keys and set the color to white to mark the explored nodes
@@ -203,10 +203,10 @@ cv2.line(map, (270,95), (355,95), (255,0, 0), thickness = 1)
 cv2.line(map, (355,95), (355,500), (255,0, 0), thickness = 1) 
 
 # Input the array for the third obstacle
-obstacle_3 = [np.array([[800, 250], [725, 379], [575, 379], [500, 250], [574, 120], [724, 120]],np.int32)]
+obstacle_3 = [np.array([[779, 325], [650, 400], [520, 325], [520, 175], [650, 100], [779, 174]],np.int32)]
 cv2.fillPoly(map, obstacle_3, color=(255,0, 0))
-obstacle_3_c = [np.array([[805, 250], [727, 384], [572, 384], [495, 250], [572, 115], [727, 115]],np.int32)]
-cv2.polylines(map,obstacle_3_c,True,color=(255,0, 0),thickness=1)
+obstacle_3_c = [np.array([[784, 327], [650, 405], [515, 327], [515, 172], [650, 95], [784, 172]],np.int32)]
+cv2.polylines(map,obstacle_3_c,True,color=(255,0, 0),thickness=2)
 
 # Input the array for the fourth obstacle
 obstacle_4_1 = [np.array([[900,50],[900,125],[1100,125],[1100,50]])]
@@ -233,9 +233,26 @@ boundary_clearance = [np.array([[0,0], [1200,0], [1200,500], [0,500]])]
 cv2.polylines(map,boundary_clearance,True,color=(255,0, 0),thickness=5)
 
 
-########################### Use of semi algebraic models for obstacle space definition########################
+########################### Use of half plane equations for obstacle space definition########################
 
-
+# defining the obstacle space using half equations
+def obstacle_space(x,y):
+    obs_present = 0
+    if x <= 5 and x >= 1195 and y <=5 and y >= 495:
+        obs_present=1
+    if x >= 95 and x <= 180 and y>= 95 and y <= 500:
+        obs_present=1
+    if x >= 270 and x <= 355 and y>=0 and y <= 405:
+        obs_present=1
+    if x >= 515 and x <= 784 and (((y - 405) - ((405 - 327)/ (650 - 515))* (x - 650)) <= 0) and (((y - 405) - ((405 - 327)/(650 - 784))* (x - 650)) <= 0) and (((y - 172) - ((172 - 95)/ (515 - 650))* (x - 515)) >= 0) and (((y - 172) - ((172 - 95)/ (784 - 650))* (x - 784)) >= 0):
+        obs_present=1
+    if x >= 895 and x <= 1105 and y>= 370 and y <= 455:
+        obs_present=1
+    if x >= 895 and x <= 1105 and y>= 50 and y <= 130:
+        obs_present=1
+    if x >= 175 and x <= 1105 and y>= 130 and y <= 370:
+        obs_present=1
+    return obs_present
 
 ###################################### Inputs and initializations ############################################
 
@@ -248,12 +265,12 @@ def user_input(type_of_point):
     while True:
         x = input(f"Please enter X Coordinate of {type_of_point}: ")
         y = input(f"Please enter Y Coordinate of {type_of_point}: ")
-        # check if the initial state is valid to the map dimensions
+        # check if the initial state and goal state is valid to the map dimensions
         if not (0 <= int(x) < map.shape[1] and 0 <= int(y) < map.shape[0]):
             print("Enter valid coordinates as per map dimensions")
             
-        #check if the initial state overlaps the obstacle space 
-        elif map[map.shape[0] - int(y) - 1][int(x)][0] == 255:
+        #check if the initial state and goal state overlaps the obstacle space 
+        elif obstacle_space(int(x),int(y)) == 1:
             print(f"ERROR !!! {type_of_point.lower()} overlaps with obstacle")
         else:
             return [int(x), int(y)]
